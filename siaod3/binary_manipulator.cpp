@@ -100,7 +100,7 @@ void printAllBinary(string fname)
 	}
 }
 
-//печатает из бинарного файла 1 запись
+//печатает из бинарного файла 1 запись (row это НОМЕР ряда, а не индекс)
 void printRowBinary(string fname, int row)
 {
 	ifstream bin;
@@ -124,6 +124,39 @@ void printRowBinary(string fname, int row)
 	else {
 		exit(9);
 	}
+}
+
+//доступ к записи
+Patient* getRowBinary(string fname, int row){
+	ifstream bin;
+	bin.open(fname + "_bin.dat", ios::binary);
+	if (!bin.is_open()) {
+		exit(20);
+	}
+	Patient temp;
+	bool flag = false;
+	bin.seekg((row - 1) * sizeof(Patient), ios::beg);
+	bin.read((char*)&temp, sizeof(Patient));
+	if (bin.eof() or row < 1) {
+		flag = true;
+	}
+	bin.clear();
+	if (bin.good()) {
+		bin.close();
+	}
+	else {
+		exit(21);
+	}
+	if (flag) {
+		return nullptr;
+	}
+	Patient *res = new Patient;
+	res->card = temp.card;
+	for (int i = 0; i < 16; i++) {
+		res->doctor[i] = temp.doctor[i];
+	}
+	res->illness = temp.illness;
+	return res;
 }
 
 //заменяет на последнюю запись
@@ -288,16 +321,19 @@ void newDoctorFor(string fname, int* cards, int n, char doctor[16])
 }
 
 //тестирование из предыдущей работы
-void testBinF()
+string testBinF()
 {
+	Patient* temp = nullptr;
 	string str;
 	cout << "Enter file name: ";
 	cin >> str;
 	int* arr;
-	createTextFile(str, 10);
 	int data;
+	cout << "How much notes? ";
+	cin >> data;
+	createTextFile(str, data);
 	int task = 1;
-	cout << "File " << str << ".txt was created and filled with random nodes. ";
+	cout << "File " << str << ".txt was created and filled with random notes. ";
 
 	while (task > 0 and task < 8) {
 		cout << "Choose task:\n1) To binary\n2) To text\n3) Print from binary file\n4) Print row\n5) Delete by key\n6) Create new file with only illness\n7) New doctor to\n";
@@ -322,7 +358,10 @@ void testBinF()
 			cout << "Row = ";
 			cin >> data;
 			cout << "Row " << data << ": ";
-			printRowBinary(str, data);
+			temp = getRowBinary(str, data);
+			if (temp) {
+				cout << temp->card << " " << temp->illness << " " << temp->doctor;
+			}
 			cout << "\n---completed---\n\n";
 			break;
 		case 5:
@@ -358,6 +397,7 @@ void testBinF()
 			break;
 		}
 	}
-	cout << "---exit---";
+	cout << "---exit---\n";
+	return str;
 }
 

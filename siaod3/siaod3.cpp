@@ -1,6 +1,6 @@
-﻿#include <iostream>
+﻿/*#include <iostream>
 #include <fstream>
-#include <string>
+#include <string>*/
 #include "HashApp.h"
 using namespace std;
 int main()

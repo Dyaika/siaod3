@@ -142,10 +142,10 @@ void testHashT()
 		insertInHashTable((int)rand() % 10 + i * 10 + 1000, i, t);
 
 	}
-	cout << "Hash table was created and filled with " << data << " random nodes. ";
+	cout << "Hash table was created and filled with " << data << " random notes. ";
 	int task = 1;
 	while (task > 0 and task < 7) {
-		cout << "Choose task:\n1) Test hash function (without inserting)\n2) Print table\n3) Insert node\n4) Delete node\n5) Find node\n6) Rehash table\n";
+		cout << "Choose task:\n1) Test hash function (without inserting)\n2) Print table\n3) Insert note\n4) Delete note\n5) Find note\n6) Rehash table\n";
 		cin >> task;
 		switch (task)
 		{
@@ -200,7 +200,7 @@ void testHashT()
 			break;
 		}
 	}
-	cout << "---exit---";
+	cout << "---exit---\n";
 	
 	/*cout << "searching key 1589: " << searchInHashTable(1589, t) << "\n";
 	cout << "searching key 1321: " << searchInHashTable(1321, t) << "\n";

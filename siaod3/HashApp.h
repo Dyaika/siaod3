@@ -14,6 +14,7 @@ public:
 	HashApp();
 private:
 	void zadanie1();
+	void clearscreen(int n = 300);
 };
 #endif // !__HASHAPP_H
 
