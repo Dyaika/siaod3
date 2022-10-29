@@ -1,15 +1,15 @@
 #include "binary_manipulator.h"
 
 //создает текстовый файл со строками
-void createTextFile(string fname, int length)
+void createTextFile(string fname, int length = 0)
 {
 	ofstream tout;
 	if (!tout.is_open()) {
-		tout.open(fname + ".txt");
+		tout.open(fname);
 	}
-	string doctors[5] = { "Ivanov", "Petrov", "Razshildyeav", "Archipov", "Shabalov"};
+	string doctors[5] = { "Ivanov", "Petrov", "Razshildyaev", "Archipov", "Shabalov"};
 
-	int n = rand() % 10 + length;
+	int n = length;//раньше было рандомно
 	//карточка код фамилия
 	for (int i = 0; i < n; i++) {
 		tout << (int)rand() % 10 + i * 10 + 1000 << " " << (int)rand() % 15 + 1 << " " << doctors[rand() % 5] << "\n";
@@ -24,25 +24,26 @@ void createTextFile(string fname, int length)
 }
 
 //создает бинарный файл по текстовому
-void textToBinary(string fname)
+void textToBinary(string fname, fstream& b)
 {
-	ofstream bout;
-	bout.open(fname + "_bin.dat", ios::binary);
+
 	ifstream tin;
-	tin.open(fname + ".txt");
-	if (!bout.is_open() or !tin.is_open()) {
+	tin.open(fname);
+	b.clear();
+	if (!b.is_open() or !tin.is_open()) {
 		exit(2);
 	}
+	b.seekg(0, ios::beg);//поставили в начало
 	Patient temp;
-	tin >> temp.card >> temp.illness >> temp.doctor;
-	while (!tin.eof()) {
-		bout.write((char*)&temp, sizeof(Patient));
-		tin >> temp.card >> temp.illness >> temp.doctor;
+	//tin >> temp.card >> temp.illness >> temp.doctor;
+	while (tin >> temp.card >> temp.illness >> temp.doctor) {
+		
+		b.write((char*)&temp, sizeof(Patient));
 	}
-	bout.clear();
+	b.seekg(0, ios::beg);//вернули в начало
+	b.clear();
 	tin.clear();
-	if (bout.good() and tin.good()) {
-		bout.close();
+	if (b.good() and tin.good()) {
 		tin.close();
 	}
 	else {
@@ -51,26 +52,26 @@ void textToBinary(string fname)
 }
 
 //создает текстовый файл по бинарному
-void binaryToText(string fname)
+void binaryToText(fstream& b, string fname)
 {
-	ifstream bin;
-	bin.open(fname + "_bin.dat", ios::binary);
 	ofstream tout;
-	tout.open(fname + "_text.txt");
-	if (!tout.is_open() or !bin.is_open()) {
+	tout.open(fname);
+	b.clear();
+	if (!tout.is_open() or !b.is_open()) {
 		exit(4);
 	}
+	b.seekg(0, ios::beg);//поставили в начало
 	Patient temp;
-	bin.read((char*)&temp, sizeof(Patient));
-	while (!bin.eof()) {
+	b.read((char*)&temp, sizeof(Patient));
+	while (!b.eof()) {
 		tout << temp.card << " " << temp.illness << " " << temp.doctor << "\n";
-		bin.read((char*)&temp, sizeof(Patient));
+		b.read((char*)&temp, sizeof(Patient));
 	}
 	tout.clear();
-	bin.clear();
-	if (tout.good() and bin.good()) {
+	b.seekg(0, ios::beg);//вернули в начало
+	b.clear();
+	if (tout.good() and b.good()) {
 		tout.close();
-		bin.close();
 	}
 	else {
 		exit(5);
@@ -78,78 +79,60 @@ void binaryToText(string fname)
 }
 
 //печатает из бинарного файла
-void printAllBinary(string fname)
+void printAllBinary(fstream& b)
 {
-	ifstream bin;
-	bin.open(fname + "_bin.dat", ios::binary);
-	if (!bin.is_open()) {
+	b.clear();
+	if (!b.is_open()) {
 		exit(6);
 	}
+	b.seekg(0, ios::beg);//поставили в начало
 	Patient temp;
-	bin.read((char*)&temp, sizeof(Patient));
-	while (!bin.eof()) {
+	b.read((char*)&temp, sizeof(Patient));
+	while (!b.eof()) {
 		cout << temp.card << " " << temp.illness << " " << temp.doctor << "\n";
-		bin.read((char*)&temp, sizeof(Patient));
+		b.read((char*)&temp, sizeof(Patient));
 	}
-	bin.clear();
-	if (bin.good()) {
-		bin.close();
-	}
-	else {
+	b.seekg(0, ios::beg);//вернули в начало
+	b.clear();
+	if (!b.good()) {
 		exit(7);
 	}
 }
 
-//печатает из бинарного файла 1 запись (row это НОМЕР ряда, а не индекс)
-void printRowBinary(string fname, int row)
+//печатает из бинарного файла одну запись (row это НОМЕР ряда, а не индекс)
+void printRowBinary(fstream& b, int row)
 {
-	ifstream bin;
-	bin.open(fname + "_bin.dat", ios::binary);
-	if (!bin.is_open()) {
-		exit(8);
-	}
-	Patient temp;
-	bin.seekg((row - 1) * sizeof(Patient), ios::beg);
-	bin.read((char*)&temp, sizeof(Patient));
-	if (bin.eof() or row < 1) {
-		cout << "out of range\n";
+	Patient* temp = getRowBinary(b, row);
+	if (temp) {
+		cout << temp->card << " " << temp->illness << " " << temp->doctor;
 	}
 	else {
-		cout << temp.card << " " << temp.illness << " " << temp.doctor << "\n";
-	}
-	bin.clear();
-	if (bin.good()) {
-		bin.close();
-	}
-	else {
-		exit(9);
+		cout << "no data";
 	}
 }
 
 //доступ к записи
-Patient* getRowBinary(string fname, int row){
-	ifstream bin;
-	bin.open(fname + "_bin.dat", ios::binary);
-	if (!bin.is_open()) {
+Patient* getRowBinary(fstream& b, int row){
+	b.clear();
+	if (!b.is_open()) {
 		exit(20);
 	}
 	Patient temp;
 	bool flag = false;
-	bin.seekg((row - 1) * sizeof(Patient), ios::beg);
-	bin.read((char*)&temp, sizeof(Patient));
-	if (bin.eof() or row < 1) {
+	b.seekg((row - 1) * sizeof(Patient), ios::beg);
+	b.read((char*)&temp, sizeof(Patient));
+	if (b.eof() or row < 1) {
 		flag = true;
 	}
-	bin.clear();
-	if (bin.good()) {
-		bin.close();
-	}
-	else {
+	b.seekg(0, ios::beg);//вернули в начало
+	b.clear();
+	if (!b.good()) {
 		exit(21);
 	}
 	if (flag) {
 		return nullptr;
 	}
+	//клонируем чтоб не удалился
 	Patient *res = new Patient;
 	res->card = temp.card;
 	for (int i = 0; i < 16; i++) {
@@ -160,58 +143,36 @@ Patient* getRowBinary(string fname, int row){
 }
 
 //заменяет на последнюю запись
-void deleteByKey(string fname, int key)
+bool deleteByKey(fstream& b, int key)
 {
-	ifstream bin;
-	bin.open(fname + "_bin.dat", ios::binary);
-	if (!bin.is_open()) {
+	b.clear();
+	if (!b.is_open()) {
 		exit(10);
 	}
+	b.seekg(0, ios::beg);//поставили в начало
 	Patient last;
 	int i = 0;
 	int pos = -1;
-	bin.read((char*)&last, sizeof(Patient));
-	if (last.card == key) {
-		pos = i;
-	}
-	i++;
-	while (!bin.eof()) {
-		bin.read((char*)&last, sizeof(Patient));
+	while (b.read((char*)&last, sizeof(Patient))) {
 		if (last.card == key) {
 			pos = i;
 		}
 		i++;
 	}
-	bin.clear();
-	if (bin.good()) {
-		bin.close();
+	if (pos == -1) {
+		return false;
 	}
 	else {
+		b.clear();
+		b.seekp(pos * sizeof(Patient), ios::beg);//вернулись к удаляемому
+		b.write((char*)&last, sizeof(Patient));//затерли
+	}
+	b.seekg(0, ios::beg);//вернули в начало
+	b.clear();
+	if (!b.good()) {
 		exit(11);
 	}
-	if (pos == -1) {
-		cout << "No such patient\n";
-	}
-	else {
-		fstream bout;
-		bout.open(fname + "_bin.dat", ios::binary | ios::out | ios::in);
-		if (!bout.is_open()) {
-			exit(12);
-		}
-
-		bout.seekg(pos * sizeof(Patient), ios::beg);
-		bout.write((char*)&last, sizeof(Patient));
-
-		//bout.flush();
-		bout.clear();
-		if (bout.good()) {
-			bout.close();
-		}
-		else {
-			exit(13);
-		}
-	}
-	
+	return true;
 }
 
 //удаляет запись смещением всех остальных (в конце дублируется запись)
@@ -251,47 +212,44 @@ void deleteByKey_alt(string fname, int key)
 }
 
 //выбирает определенных больных
-void onlyPatientsWith(string fname, int illness)
+void onlyPatientsWith(fstream& b, string fname, int illness)
 {
+	b.clear();
 	ofstream bout;
-	bout.open(fname + to_string(illness) + "_bin.dat", ios::binary);
-	ifstream bin;
-	bin.open(fname + "_bin.dat", ios::binary);
+	bout.open(fname, ios::binary);
 	//cout << "DELETE THIS\n" << bout.is_open() << " " << bin.is_open() << "\nDELETE THIS\n";
-	if (!bout.is_open() or !bin.is_open()) {
+	if (!bout.is_open() or !b.is_open()) {
 		exit(14);
 	}
+	b.seekg(0, ios::beg);//поставили в начало
 	Patient temp;
-	bin.read((char*)&temp, sizeof(Patient));
-	while (!bin.eof()) {
+	while (b.read((char*)&temp, sizeof(Patient))) {
 		if (temp.illness == illness) {
 			bout.write((char*)&temp, sizeof(Patient));
 		}
-		bin.read((char*)&temp, sizeof(Patient));
 	}
 	bout.clear();
-	bin.clear();
-	if (bout.good() and bin.good()) {
+	b.clear();
+	if (bout.good() and b.good()) {
 		bout.close();
-		bin.close();
 	}
 	else {
 		exit(15);
 	}
+	b.seekg(0, ios::beg);//вернули в начало
 }
 
 //назначает доктора, не готова
-void newDoctorFor(string fname, int* cards, int n, char doctor[16])
+void newDoctorFor(fstream& b, int* cards, int n, char doctor[16])
 {
-	fstream b;
-	b.open(fname + "_bin.dat", ios::binary | ios::out | ios::in);
+	b.clear();
 	if (!b.is_open()) {
 		exit(16);
 	}
+	b.seekg(0, ios::beg);//поставили в начало
 	Patient temp;
 	int count = 0;
-	b.read((char*)&temp, sizeof(Patient));
-	while (!b.eof())
+	while (b.read((char*)&temp, sizeof(Patient)))
 	{
 		for (int i = 0; i < n; i++) {
 			if (temp.card == cards[i]) {
@@ -309,13 +267,12 @@ void newDoctorFor(string fname, int* cards, int n, char doctor[16])
 		b.clear();
 		//шагаем дальше и читаем для будущего раза
 		b.seekg(sizeof(Patient) * (count), ios::beg);
-		b.read((char*)&temp, sizeof(Patient));
+		
 	}
+
+	b.seekg(0, ios::beg);//вернули в начало
 	b.clear();
-	if (b.good()) {
-		b.close();
-	}
-	else {
+	if (!b.good()) {
 		exit(17);
 	}
 }
@@ -331,52 +288,68 @@ string testBinF()
 	int data;
 	cout << "How much notes? ";
 	cin >> data;
-	createTextFile(str, data);
+	createTextFile(str + ".txt", data);
 	int task = 1;
-	cout << "File " << str << ".txt was created and filled with random notes. ";
-
+	//создаем бинарный файл
+	ofstream b0;
+	b0.open(str + "_bin.dat", ios::binary);
+	b0.close();
+	//открываем его для чтения/записи
+	fstream b, btemp;
+	b.open(str + "_bin.dat", ios::binary | ios::out | ios::in);
+	cout << "File " << str << ".txt was created and filled with random notes. Empty file " << str << "_bin.dat was created.";
 	while (task > 0 and task < 8) {
 		cout << "Choose task:\n1) To binary\n2) To text\n3) Print from binary file\n4) Print row\n5) Delete by key\n6) Create new file with only illness\n7) New doctor to\n";
 		cin >> task;
 		switch (task)
 		{
 		case 1:
-			textToBinary(str);
+			textToBinary(str + ".txt", b);
 			cout << "Binary file is " << str << "_bin.dat\n";
 			cout << "---completed---\n\n";
 			break;
 		case 2:
-			binaryToText(str);
+			binaryToText(b, str + "_text.txt");
 			cout << "Text file is " << str << "_text.txt\n";
 			cout << "---completet---\n\n";
 			break;
 		case 3:
-			printAllBinary(str);
-			cout << "\n---completed---\n\n";
+			printAllBinary(b);
+			cout << "---completed---\n\n";
 			break;
 		case 4:
 			cout << "Row = ";
 			cin >> data;
 			cout << "Row " << data << ": ";
-			temp = getRowBinary(str, data);
+			temp = getRowBinary(b, data);
 			if (temp) {
 				cout << temp->card << " " << temp->illness << " " << temp->doctor;
+			}
+			else {
+				cout << "no data";
 			}
 			cout << "\n---completed---\n\n";
 			break;
 		case 5:
-			cout << "Key = ";
+			cout << "Key to delete = ";
 			cin >> data;
-			deleteByKey(str, data);
+			if (deleteByKey(b, data)) {
+				cout << "removed";
+			}
+			else {
+				cout << "not found";
+			}
 			cout << "\n---completed---\n\n";
 			break;
 		case 6:
 			cout << "Illness = ";
 			cin >> data;
-			onlyPatientsWith(str, data);
-			cout << str << data << "_bin.dat:\n";
-			printAllBinary(str + to_string(data));
-			cout << "\n---completed---\n\n";
+			onlyPatientsWith(b, str + "_" + to_string(data) + ".dat", data);
+			cout << str << "_" << data << ".dat:\n";
+			btemp.open(str + "_" + to_string(data) + ".dat", ios::binary | ios::out | ios::in);
+			printAllBinary(btemp);
+			btemp.close();
+			cout << "---completed---\n\n";
 			break;
 		case 7:
 			cout << "How much patients? ";
@@ -389,14 +362,15 @@ string testBinF()
 			cout << "Who is new doctor? ";
 			char doc[16];
 			cin >> doc;
-			newDoctorFor(str, arr, data, doc);
-			cout << "\n---completed---\n\n";
+			newDoctorFor(b, arr, data, doc);
+			cout << "---completed---\n\n";
 			delete[] arr;
 			break;
 		default:
 			break;
 		}
 	}
+	b.close();
 	cout << "---exit---\n";
 	return str;
 }

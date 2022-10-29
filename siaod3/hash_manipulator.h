@@ -20,6 +20,7 @@ struct ListElem
 struct typeitem
 {
 	ListElem* head = nullptr;
+	~typeitem();
 };
 
 #endif // !typeitem_struct

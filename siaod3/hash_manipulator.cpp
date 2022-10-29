@@ -13,18 +13,20 @@ void printTable(MyHashTable& t)
 				cur = cur->next;
 			}
 		}
-		cout << "}\n\n";
+		cout << "}\n";
 	}
 }
 
 //хэш-функция (число + сумма его цифр % L)
 int hashFunc(int key, int L)
 {
-	int sum = key;
+	int sum = 0;
+	int i = 0;
 	//int koef = 2147483647 / key;
 	int koef = 1;
 	while (key > 0) {
-		sum += (key % 10) * koef;
+		sum += (key % 10) * pow(2, i);
+		i++;
 		key /= 10;
 	}
 	return sum % L;
@@ -201,15 +203,14 @@ void testHashT()
 		}
 	}
 	cout << "---exit---\n";
-	
-	/*cout << "searching key 1589: " << searchInHashTable(1589, t) << "\n";
-	cout << "searching key 1321: " << searchInHashTable(1321, t) << "\n";
-	cout << "searching key 1044: " << searchInHashTable(1044, t) << "\n";
-	deleteFromHashTable(1105, t);
-	deleteFromHashTable(1522, t);
-	printTable(t);
-	int a = 5;
-	int* b = &a;
-	*b = 66;
-	cout << a;*/
+}
+
+typeitem::~typeitem()
+{
+	ListElem* cur;
+	while (this->head) {
+		cur = this->head;
+		this->head = cur->next;
+		delete cur;
+	}
 }
