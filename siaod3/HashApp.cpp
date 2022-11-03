@@ -5,11 +5,6 @@ HashApp::HashApp()
 	zadanie1();
 }
 
-void HashApp::clearscreen(int n) {
-	for (int i = 0; i < n; i++) {
-		cout << "\n";
-	}
-}
 void HashApp::zadanie1()
 {
 	int task = 1;
@@ -19,15 +14,12 @@ void HashApp::zadanie1()
 		switch (task) {
 		case 1:
 			testBinF();
-			//clearscreen();
 			break;
 		case 2:
 			testHashT();
-			//clearscreen();
 			break;
 		case 3:
 			testBinaryHash();
-			//clearscreen();
 			break;
 		default:
 			cout << "---exit---\n";
@@ -35,7 +27,4 @@ void HashApp::zadanie1()
 		}
 	}
 	
-	//string str = testBinF();
-	//testHashT();
-
 }

@@ -17,7 +17,7 @@ void printTable(MyHashTable& t)
 	}
 }
 
-//хэш-функция (число + сумма его цифр % L)
+//хэш-функция
 int hashFunc(int key, int L)
 {
 	int sum = 0;

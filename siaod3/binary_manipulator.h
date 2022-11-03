@@ -24,11 +24,14 @@ void printRowBinary(fstream& b, int row);
 //доступ к записи
 Patient* getRowBinary(fstream& b, int row);
 
-void deleteByKey_alt(string fname, int key);//старая реализация
-
+//удаляет запись
 bool deleteByKey(fstream& b, int key);
-void onlyPatientsWith(fstream& b, string fname, int illness);
-void newDoctorFor(fstream& b, int* cards, int n, char doctor[16]);
-string testBinF();
 
-//bin.open(fname + "_bin.dat", ios::binary);
+//создает файл только с 1 заболеванием
+void onlyPatientsWith(fstream& b, string fname, int illness);
+
+//меняет доктора
+void newDoctorFor(fstream& b, int* cards, int n, char doctor[16]);
+
+//тестирует
+string testBinF();

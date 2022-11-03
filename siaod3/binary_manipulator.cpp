@@ -175,42 +175,6 @@ bool deleteByKey(fstream& b, int key)
 	return true;
 }
 
-//удаляет запись смещением всех остальных (в конце дублируется запись)
-void deleteByKey_alt(string fname, int key)
-{
-	fstream b;
-	b.open(fname + "_bin.dat", ios::binary | ios::out | ios::in);
-	if (!b.is_open()) {
-		exit(18);
-	}
-	int is_deleted = 0;
-	int count = 0;
-	Patient temp;
-	while (b.read((char*)&temp, sizeof(Patient))) {
-		if (temp.card == key) {
-			is_deleted = 1;
-			//b.seekg(sizeof(Patient) * (count + is_deleted), ios::beg);
-			if (!b.read((char*)&temp, sizeof(Patient))) {
-				break;
-			}
-		}
-		b.clear();
-		b.seekg(sizeof(Patient) * (count), ios::beg);
-		cout << temp.card << " " << temp.illness << " " << temp.doctor << "\n";
-		b.write((char*)&temp, sizeof(Patient));
-		count++;
-		b.clear();
-		b.seekg(sizeof(Patient) * (count + is_deleted), ios::beg);
-	}
-	b.clear();
-	if (b.good()) {
-		b.close();
-	}
-	else {
-		exit(19);
-	}
-}
-
 //выбирает определенных больных
 void onlyPatientsWith(fstream& b, string fname, int illness)
 {
@@ -239,7 +203,7 @@ void onlyPatientsWith(fstream& b, string fname, int illness)
 	b.seekg(0, ios::beg);//вернули в начало
 }
 
-//назначает доктора, не готова
+//назначает доктора
 void newDoctorFor(fstream& b, int* cards, int n, char doctor[16])
 {
 	b.clear();

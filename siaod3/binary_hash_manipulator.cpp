@@ -60,6 +60,7 @@ void testBinaryHash()
 		printRowBinary(b, length / 2);
 		cout << "\n" << length << ") ";
 		printRowBinary(b, length);
+		cout << "\n";
 	}
 	int task = 1;
 	int row = 1;
